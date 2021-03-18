@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using File = Google.Apis.Drive.v3.Data.File;
 using System;
@@ -13,11 +13,11 @@ namespace MARAFON
 {
     public class GoogleDriveApi
     {
-        static string[] Scopes = { DriveService.Scope.Drive,                  // view and manage your files and documents
-                                         DriveService.Scope.DriveAppdata,           // view and manage its own configuration data
-                                         DriveService.Scope.DriveFile,              // view and manage files created by this app
-                                         DriveService.Scope.DriveMetadataReadonly,  // view metadata for files
-                                         DriveService.Scope.DriveReadonly,          // view files and documents on your drive
+        static string[] Scopes = { DriveService.Scope.Drive,
+                                         DriveService.Scope.DriveAppdata,
+                                         DriveService.Scope.DriveFile,
+                                         DriveService.Scope.DriveMetadataReadonly,
+                                         DriveService.Scope.DriveReadonly,
                                          DriveService.Scope.DriveScripts};
         private static string ApplicationName = "CollegePracticeImages";
         private static string FolderId = "1kEhKSgJIZ3Aaer9Ma4ZG0vkdlswN5yVP";
@@ -33,16 +33,11 @@ namespace MARAFON
         {
             credential = GetUserCredential();
             service = GetDriveService(credential);
-
-            //UploadFileToDrive(filePath, contentType);
-
-            //DownloadFileFromGoogleDrive(service, "1duhjFe9akqF0CgU2PtwgF9mJXZWGFhja", downloadPath);
-            //Console.ReadLine();
         }
 
         public void DeleteImage(string fileId)
         {
-            service.Files.Delete("1duhjFe9akqF0CgU2PtwgF9mJXZWGFhja").Execute();
+            service.Files.Delete(fileId).Execute();
         }
 
         public string UploadFileToDrive(string filePath)
@@ -60,7 +55,6 @@ namespace MARAFON
             request.Upload();
             var fileEnd = request.ResponseBody;
             Console.WriteLine("FILe ID :" + fileEnd.Id);
-            //end
             return fileEnd.Id;
         }
 
@@ -103,9 +97,6 @@ namespace MARAFON
             using (var stream =
                new FileStream("../../resources/GoogleDrive/client_secret.json", FileMode.Open, FileAccess.Read))
             {
-                // The file token.json stores the user's access and refresh tokens, and is created
-                // automatically when the authorization flow completes for the first time.
-
                 string credPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
                 credPath = Path.Combine(credPath, "college practice images", "college-practice-images");
                 return GoogleWebAuthorizationBroker.AuthorizeAsync(
