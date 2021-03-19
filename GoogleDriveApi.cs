@@ -8,6 +8,7 @@ using Google.Apis.Download;
 using Google.Apis.Util.Store;
 using System.Threading;
 using Google.Apis.Services;
+using System.Windows.Forms;
 
 namespace MARAFON
 {
@@ -25,7 +26,7 @@ namespace MARAFON
         //private static string filePath = @"fqaw.jpg";
         private static string contentType = "image/jpeg/png";
         //static string downloadPath = @"C:\Users\FrCo18PC\Desktop\test.jpg";
-        private static string downloadPath = System.IO.Path.GetTempPath() + "tempImage.jpg";
+        private static string downloadPath = System.IO.Path.GetTempPath();
         private static DriveService service;
         private static UserCredential credential;
 
@@ -33,6 +34,36 @@ namespace MARAFON
         {
             credential = GetUserCredential();
             service = GetDriveService(credential);
+
+        }
+
+        private bool disposed = false;
+
+        // реализация интерфейса IDisposable.
+        public void Dispose()
+        {
+            Dispose(true);
+            // подавляем финализацию
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    // Освобождаем управляемые ресурсы
+                }
+                // освобождаем неуправляемые объекты
+                disposed = true;
+            }
+        }
+
+        // Деструктор
+        ~GoogleDriveApi()
+        {
+            Dispose(false);
         }
 
         public void DeleteImage(string fileId)
@@ -58,8 +89,11 @@ namespace MARAFON
             return fileEnd.Id;
         }
 
+        //private bool 
+
         public string DownloadFileFromGoogleDrive(string fileId)
         {
+            var image_name = "";
             var request = service.Files.Get(fileId);
             using (var memoryStream = new MemoryStream())
             {
@@ -80,14 +114,38 @@ namespace MARAFON
                 };
 
                 request.Download(memoryStream);
-
-                using (var fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write))
+                image_name = request.Execute().Name;
+                int i = 0;
+                while (true)
                 {
-                    fileStream.Write(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length);
+                    FileInfo file_check = new FileInfo(downloadPath + image_name);
+                    if (file_check.Exists)
+                    {
+                        image_name = i + image_name;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    i++;
                 }
+
+
+                try
+                {
+                    using (var fileStream = new FileStream(downloadPath + image_name, FileMode.Create, FileAccess.Write))
+                    {
+                        fileStream.Write(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length);
+                    }
+                }
+                catch
+                {
+                    return DownloadFileFromGoogleDrive(fileId);
+                }
+
             }
 
-            return downloadPath;
+            return downloadPath + image_name;
         }
 
 
